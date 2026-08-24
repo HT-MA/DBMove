@@ -1,0 +1,61 @@
+replicaCount: 1
+
+image:
+  repository: dbmove
+  apiTag: latest
+  webTag: latest
+  workerTag: latest
+  pullPolicy: IfNotPresent
+
+namespace: dbmove
+
+api:
+  port: 8080
+  databaseUrl: "postgres://dbmove:dbmove123@dbmove-postgres:5432/dbmove?sslmode=disable"
+  encryptionKey: ""          # base64 of a 32-byte key; required
+  executionMode: kubernetes
+  workerImage: "dbmove-worker:latest"
+  apiUrl: "http://dbmove-api:8080"
+  maxConcurrentMigrations: 3
+  internalToken: ""          # shared token between API and workers
+  dataDir: /data
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: "2"
+      memory: 1Gi
+
+web:
+  port: 80
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+# Resource requests/limits for migration worker Jobs.
+worker:
+  requestsCpu: 500m
+  requestsMemory: 512Mi
+  limitsCpu: "4"
+  limitsMemory: 4Gi
+  ttlSecondsAfterFinished: 3600
+
+serviceAccount:
+  create: true
+  name: dbmove
+
+rbac:
+  create: true
+
+ingress:
+  enabled: false
+  className: ""
+  host: dbmove.example.com
+  tls:
+    enabled: false
+    secretName: ""

@@ -1,0 +1,24 @@
+# Go
+backend/dbmove-api
+worker/dbmove-worker
+*.exe
+*.test
+coverage.out
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local data
+data/
+
+# Playwright CLI artifacts
+.playwright-cli/

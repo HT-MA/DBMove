@@ -1,0 +1,69 @@
+name: dbmove
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: dbmove
+      POSTGRES_PASSWORD: dbmove123
+      POSTGRES_DB: dbmove
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dbmove -d dbmove"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./backend
+    image: dbmove-api:local
+    container_name: dbmove-api
+    environment:
+      DBMOVE_DATABASE_URL: postgres://dbmove:dbmove123@postgres:5432/dbmove?sslmode=disable
+      # base64 of a 32-byte key: 0123456789abcdef0123456789abcdef
+      DBMOVE_ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      DBMOVE_EXECUTION_MODE: docker
+      DBMOVE_WORKER_IMAGE: dbmove-worker:local
+      DBMOVE_API_URL: http://api:8080
+      DBMOVE_DOCKER_NETWORK: dbmove_default
+      DBMOVE_DATA_DIR: /data
+      DBMOVE_MAX_CONCURRENT_MIGRATIONS: "3"
+      DBMOVE_CORS_ORIGINS: "*"
+      DBMOVE_INTERNAL_TOKEN: dbmove-dev-internal-token
+    ports:
+      - "8080:8080"
+    volumes:
+      # Docker execution mode: the API launches worker containers through the daemon.
+      - /var/run/docker.sock:/var/run/docker.sock
+      - dbmove-data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./frontend
+    image: dbmove-web:local
+    container_name: dbmove-web
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  # Builds the worker image used by the API in Docker execution mode.
+  worker:
+    image: dbmove-worker:local
+    build:
+      context: ./worker
+    entrypoint: ["true"]
+    command: ["true"]
+    restart: "no"
+
+volumes:
+  pgdata:
+  dbmove-data:

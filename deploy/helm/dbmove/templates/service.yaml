@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dbmove.name" . }}-api
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: dbmove-api
+    {{- include "dbmove.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: dbmove-api
+  ports:
+    - port: 8080
+      targetPort: http
+      name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dbmove.name" . }}-web
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: dbmove-web
+    {{- include "dbmove.labels" . | nindent 4 }}
+spec:
+  selector:
+    app: dbmove-web
+  ports:
+    - port: {{ .Values.web.port }}
+      targetPort: http
+      name: http

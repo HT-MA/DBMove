@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dbmove.name" . }}-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "dbmove.labels" . | nindent 4 }}
+data:
+  DBMOVE_DATABASE_URL: {{ .Values.api.databaseUrl | quote }}
+  DBMOVE_EXECUTION_MODE: {{ .Values.api.executionMode | quote }}
+  DBMOVE_WORKER_IMAGE: {{ .Values.api.workerImage | quote }}
+  DBMOVE_API_URL: {{ .Values.api.apiUrl | quote }}
+  DBMOVE_K8S_NAMESPACE: {{ .Values.namespace | quote }}
+  DBMOVE_MAX_CONCURRENT_MIGRATIONS: {{ .Values.api.maxConcurrentMigrations | quote }}
+  DBMOVE_DATA_DIR: {{ .Values.api.dataDir | quote }}
+  DBMOVE_K8S_JOB_REQUESTS_CPU: {{ .Values.worker.requestsCpu | quote }}
+  DBMOVE_K8S_JOB_REQUESTS_MEMORY: {{ .Values.worker.requestsMemory | quote }}
+  DBMOVE_K8S_JOB_LIMITS_CPU: {{ .Values.worker.limitsCpu | quote }}
+  DBMOVE_K8S_JOB_LIMITS_MEMORY: {{ .Values.worker.limitsMemory | quote }}
+  DBMOVE_K8S_JOB_TTL_SECONDS: {{ .Values.worker.ttlSecondsAfterFinished | quote }}
